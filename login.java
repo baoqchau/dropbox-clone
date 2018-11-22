@@ -65,7 +65,11 @@ public class login extends JFrame {
 		
 	
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> fa16ffc81802ee31698d85084c4ab64109aeb762
 	public static void main(String args[]) 
 	{
 		new login();
