@@ -3,72 +3,42 @@
 CS4650 Team Project Assignment: Develop the backend for a Dropbox-like web service. The program will be working with AWS S3 API. 
 
 ## Implemented Functions
-
+```
 (1) Local Disk File Watcher
+```
+```
 (2) Local to S3 Sync
+```
+```
 (3) Wrap Your Program as a Web Service
+```
+```
 (4) Configuring CORS
+```
+```
 (5) Test your Endpoint with the Frontend
-
-### Prerequisites
-
-What things you need to install the software and how to install them
-
 ```
-Give examples
-```
+### Write Progress Here
 
-### Installing
+1. Created executable file with login.
 
-A step by step series of examples that tell you how to get a development env running
+2. Once user login in to the program, user can access to upload and download files
 
-Say what the step will be
+3. The Program automatically download the files from the server. The files will be saved in the local directory and displayed on the program.
 
-```
-Give the example
-```
+4. Once user run the executable, it will check whether file has changed
 
-And repeat
+5. User can upload files by drag and drop
 
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
+6. User can download files by drag and drop
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Amazon S3](http://www.aws.amazon.com/s3/) - Cloud Storage
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [AWS SDK for Java Documentation Examples](https://github.com/awsdocs/aws-doc-sdk-examples/tree/master/java) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
@@ -76,9 +46,10 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+* **Jin Kim** - [GitPage](https://github.com/texas000)
+* **Bao Chau** - [GitPage](https://github.com)
+* **Yeram Hwang** - [GitPage](https://github.com/yeramy)
+* **Inyeob Choi** - [GitPage]
 
 ## License
 
