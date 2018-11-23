@@ -49,7 +49,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 * **Jin Kim** - [GitPage](https://github.com/texas000)
 * **Bao Chau** - [GitPage](https://github.com)
 * **Yeram Hwang** - [GitPage](https://github.com/yeramy)
-* **Inyeob Choi** - [GitPage]
+* **Inyeob Choi** - [GitPage](https://github.com/InyeobChoi)
 
 ## License
 
