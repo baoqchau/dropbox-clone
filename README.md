@@ -30,7 +30,7 @@ CS4650 Team Project Assignment: Develop the backend for a Dropbox-like web servi
 
 5. User can upload files by drag and drop.
 
-6. User can download files by drag and dro.p
+6. User can download files by drag and drop.
 
 ## Built With
 
