@@ -22,15 +22,15 @@ CS4650 Team Project Assignment: Develop the backend for a Dropbox-like web servi
 
 1. Created executable file with login.
 
-2. Once user login in to the program, user can access to upload and download files
+2. Once user login in to the program, user can access to upload and download files.
 
 3. The Program automatically download the files from the server. The files will be saved in the local directory and displayed on the program.
 
-4. Once user run the executable, it will check whether file has changed
+4. Once user run the executable, it will check whether file has changed.
 
-5. User can upload files by drag and drop
+5. User can upload files by drag and drop.
 
-6. User can download files by drag and drop
+6. User can download files by drag and dro.p
 
 ## Built With
 
