@@ -38,6 +38,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.util.StringUtils;
 
 import java.nio.file.*;
@@ -104,8 +105,9 @@ public class S3TransferProgressSample {
         tx = TransferManagerBuilder.standard()
             .withS3Client(s3)
             .build();
-
-        bucketName = "dropbox-clone-cs4650";
+        
+        final String accessKeyId = credentialsProvider.getCredentials().getAWSAccessKeyId();
+        bucketName = "s3-upload-sdk-sample-" + StringUtils.lowerCase(accessKeyId);
 
         new S3TransferProgressSample();
     }
@@ -134,7 +136,7 @@ public class S3TransferProgressSample {
             if (showOpenDialog != JFileChooser.APPROVE_OPTION) return;
 
             System.out.println(fileChooser.getSelectedFile().toString());
-            createAmazonS3Bucket();
+            //createAmazonS3Bucket();
 
             ProgressListener progressListener = new ProgressListener() {
                 public void progressChanged(ProgressEvent progressEvent) {
@@ -158,24 +160,33 @@ public class S3TransferProgressSample {
                 }
             };
 
+	        	File watchDir = fileChooser.getSelectedFile();
+	        	System.out.println(watchDir.getName());
+	        	StringBuilder objectDir = new StringBuilder(watchDir.getName());
+	        	objectDir.append("/");
+	            Path dir = Paths.get(watchDir.toString());
+	            //new WatchDir(dir, true).processEvents();
+	            File[] listOfFiles = watchDir.listFiles();
+	            for (int i=0; i < listOfFiles.length; i++) {
+	            	if (listOfFiles[i].isFile()) {
+	            		 StringBuilder objectName = new StringBuilder();
+	            		 objectName.append(objectDir);
+	            		 objectName.append(listOfFiles[i].getName());
+	            		 System.out.println(objectName.toString());
+	            		 PutObjectRequest request = new PutObjectRequest(
+	                             bucketName, objectName.toString(), listOfFiles[i])
+	                         .withGeneralProgressListener(progressListener);
+	                     upload = tx.upload(request);
+	            	}
+	            }
             
-            File watchDir = fileChooser.getSelectedFile();
-            File[] listOfFiles = watchDir.listFiles();
-            for (int i=0; i < listOfFiles.length; i++) {
-            	if (listOfFiles[i].isFile()) {
-            		 PutObjectRequest request = new PutObjectRequest(
-                             bucketName, listOfFiles[i].getName(), listOfFiles[i])
-                         .withGeneralProgressListener(progressListener);
-                     upload = tx.upload(request);
-            	}
-            }
         }
     }
 
     private void createAmazonS3Bucket() {
         try {
             if (tx.getAmazonS3Client().doesBucketExist(bucketName) == false) {
-                tx.getAmazonS3Client().createBucket(bucketName);
+                tx.getAmazonS3Client().createBucket(new CreateBucketRequest(bucketName));
             }
         } catch (AmazonClientException ace) {
             JOptionPane.showMessageDialog(frame, "Unable to create a new Amazon S3 bucket: " + ace.getMessage(),
