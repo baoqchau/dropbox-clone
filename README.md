@@ -47,7 +47,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## Authors
 
 * **Jin Kim** - [GitPage](https://github.com/texas000)
-* **Bao Chau** - [GitPage](https://github.com)
+* **Bao Chau** - [GitPage](https://github.com/baoqchau)
 * **Yeram Hwang** - [GitPage](https://github.com/yeramy)
 * **Inyeob Choi** - [GitPage](https://github.com/InyeobChoi)
 
