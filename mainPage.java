@@ -1,5 +1,22 @@
 
-import javax.swing.JFileChooser;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.awt.List;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Objects;
+import javax.swing.*;
+import javax.swing.TransferHandler;
+import javax.swing.table.*;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,7 +34,9 @@ public class mainPage extends javax.swing.JFrame {
      * Creates new form mainPage
      */
     public mainPage() {
+        setTitle("WowBox");
         initComponents();
+        jTable2.setTransferHandler(new FileListTransferHandler(jTable2));
     }
 
     /**
@@ -36,6 +55,7 @@ public class mainPage extends javax.swing.JFrame {
         jTable2 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jButton4 = new javax.swing.JButton();
+        jProgressBar1 = new javax.swing.JProgressBar();
         jMenuBar2 = new javax.swing.JMenuBar();
         jMenu3 = new javax.swing.JMenu();
         jMenu4 = new javax.swing.JMenu();
@@ -119,12 +139,13 @@ public class mainPage extends javax.swing.JFrame {
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 562, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jLabel1))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -135,13 +156,15 @@ public class mainPage extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 184, Short.MAX_VALUE)
-                        .addComponent(jLabel1)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 164, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
@@ -167,7 +190,7 @@ public class mainPage extends javax.swing.JFrame {
         JFileChooser chooser = new JFileChooser();
         int returnVal = chooser.showOpenDialog(null);
     }//GEN-LAST:event_jButton4ActionPerformed
-
+    
     /**
      * @param args the command line arguments
      */
@@ -202,7 +225,68 @@ public class mainPage extends javax.swing.JFrame {
             }
         });
     }
+class FileListTransferHandler extends TransferHandler {
+   private JTable table;
 
+   public FileListTransferHandler(JTable list) {
+      this.table = list;
+   }
+
+   public int getSourceActions(JComponent c) {
+      return COPY_OR_MOVE;
+   }
+
+   public boolean canImport(TransferSupport ts) {
+      return ts.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+   }
+
+   public boolean importData(TransferSupport ts) {
+      try {
+        String dir = ts.getTransferable().getTransferData(DataFlavor.javaFileListFlavor).toString();
+        dir = dir.substring(1, dir.length()- 1);
+        System.out.println(dir);
+        
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+        //parsing directory names and converting them into file array
+        int lastComma = 0;
+        for(int i = 2; i < dir.length(); i++) {
+            //System.out.println(dir.substring(i-2,i));
+            if(dir.substring(i-2,i).equals(", ")) {
+                File file = new File(dir.substring(lastComma,i-2));
+                double num = file.length();
+                System.out.println(df.format((num/1024)/1024)+"MB");
+                lastComma = i; 
+            }
+            
+        }
+        
+        
+        
+        
+        
+        
+        List data = (List) ts.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+        System.out.println(data.toString());
+        if (data.size() < 1) {
+           return false;
+        }
+
+         DefaultTableModel tableModel = new DefaultTableModel();
+         for (Object item : data) {
+            File file = (File) item;
+            tableModel.addElement(file);
+         }
+
+         table.setModel(tableModel);
+         return true;
+      } catch (UnsupportedFlavorException e) {
+         return false;
+      } catch (IOException e) {
+         return false;
+      }
+   }
+}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -212,7 +296,9 @@ public class mainPage extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar2;
+    private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable2;
     // End of variables declaration//GEN-END:variables
 }
+
