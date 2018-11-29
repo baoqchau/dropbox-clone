@@ -77,6 +77,7 @@ public class S3TransferProgressSample {
     private Upload upload;
     private JButton button;
 
+    
     public static void main(String[] args) throws Exception {
        /*
          * The ProfileCredentialsProvider will return your [default]
@@ -172,7 +173,6 @@ public class S3TransferProgressSample {
 	            		 StringBuilder objectName = new StringBuilder();
 	            		 objectName.append(objectDir);
 	            		 objectName.append(listOfFiles[i].getName());
-	            		 System.out.println(objectName.toString());
 	            		 PutObjectRequest request = new PutObjectRequest(
 	                             bucketName, objectName.toString(), listOfFiles[i])
 	                         .withGeneralProgressListener(progressListener);

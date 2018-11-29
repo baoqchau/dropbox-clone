@@ -39,32 +39,16 @@ import java.util.*;
 
 import javax.swing.JOptionPane;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.event.ProgressEvent;
-import com.amazonaws.event.ProgressListener;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
-import com.amazonaws.util.StringUtils;
 /**
  * Example to watch a directory (or tree) for changes to files.
  */
 
-public class WatchDir {
+public class WatchDir extends Observable {
 
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
     private final boolean recursive;
     private boolean trace = false;
-    private static ProfileCredentialsProvider credentialsProvider = null;
-    private static TransferManager tx;
-
 
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
@@ -163,9 +147,11 @@ public class WatchDir {
 
                 // print out event
                 if (event.kind().name() == "ENTRY_CREATE" || event.kind().name() == "ENTRY_MODIFY") {
-                	System.out.println("Upload to S3");
+                	setChanged();
+                	notifyObservers(event.kind().name() + "-" +  name.toString() + "-" + child.toString());
                 } else if (event.kind().name() == "ENTRY_DELETE") {
-                	System.out.println("Remove from S3");
+                	setChanged();
+                	notifyObservers(event.kind().name() + "-" +  name.toString() + "-" + child.toString());
                 }
                 System.out.format("%s: %s\n", event.kind().name(), child);
 
