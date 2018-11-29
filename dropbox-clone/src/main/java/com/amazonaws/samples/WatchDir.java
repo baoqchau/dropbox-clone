@@ -49,6 +49,7 @@ public class WatchDir extends Observable {
     private final Map<WatchKey,Path> keys;
     private final boolean recursive;
     private boolean trace = false;
+    private S3Services s3Services;
 
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
@@ -97,6 +98,7 @@ public class WatchDir extends Observable {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey,Path>();
         this.recursive = recursive;
+        this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
 
         if (recursive) {
             System.out.format("Scanning %s ...\n", dir);
@@ -113,7 +115,7 @@ public class WatchDir extends Observable {
     /**
      * Process all events for keys queued to the watcher
      */
-    void processEvents() {
+    void processEvents() throws IOException {
         for (;;) {
 
             // wait for key to be signalled
@@ -146,12 +148,10 @@ public class WatchDir extends Observable {
                 System.out.println(child.toString());
 
                 // print out event
-                if (event.kind().name() == "ENTRY_CREATE" || event.kind().name() == "ENTRY_MODIFY") {
-                	setChanged();
-                	notifyObservers(event.kind().name() + "-" +  name.toString() + "-" + child.toString());
+                if (event.kind().name() == "ENTRY_CREATE") {
+                	s3Services.upload(child.toString(), name.toString());//event.kind().name() + "-" +  name.toString() + "-" + child.toString());
                 } else if (event.kind().name() == "ENTRY_DELETE") {
-                	setChanged();
-                	notifyObservers(event.kind().name() + "-" +  name.toString() + "-" + child.toString());
+                	s3Services.delete(name.toString());
                 }
                 System.out.format("%s: %s\n", event.kind().name(), child);
 
@@ -179,5 +179,17 @@ public class WatchDir extends Observable {
                 }
             }
         }
+    }
+    
+    static void usage() {
+        System.err.println("usage: java WatchDir [-r] dir");
+        System.exit(-1);
+    }
+ 
+    public static void main(String[] args) throws IOException {
+ 
+        // register directory and process its events
+        Path dir = Paths.get("/home/bao/code/cpp/dropbox-clone/dropbox-clone/test_dir");
+        new WatchDir(dir, true).processEvents();
     }
 }
