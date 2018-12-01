@@ -89,6 +89,32 @@ public class S3Services {
     }
     
     public void listFilesInBucket() throws IOException {
-    	
+    	try {
+	        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(this.bucketName).withMaxKeys(2);
+	        ListObjectsV2Result result;
+	
+	        do {
+	            result = s3Client.listObjectsV2(req);
+	
+	            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
+	                System.out.printf(" - %s (size: %d)\n", objectSummary.getKey(), objectSummary.getSize());
+	            }
+	            // If there are more than maxKeys keys in the bucket, get a continuation token
+	            // and list the next objects.
+	            String token = result.getNextContinuationToken();
+	            System.out.println("Next Continuation Token: " + token);
+	            req.setContinuationToken(token);
+	        } while (result.isTruncated());
+	    }
+	    catch(AmazonServiceException e) {
+	        // The call was transmitted successfully, but Amazon S3 couldn't process 
+	        // it, so it returned an error response.
+	        e.printStackTrace();
+	    }
+	    catch(SdkClientException e) {
+	        // Amazon S3 couldn't be contacted for a response, or the client
+	        // couldn't parse the response from Amazon S3.
+	        e.printStackTrace();
+	    }
     }
 }

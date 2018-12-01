@@ -99,6 +99,7 @@ public class WatchDir extends Observable {
         this.keys = new HashMap<WatchKey,Path>();
         this.recursive = recursive;
         this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
+        s3Services.listFilesInBucket();
 
         if (recursive) {
             System.out.format("Scanning %s ...\n", dir);
