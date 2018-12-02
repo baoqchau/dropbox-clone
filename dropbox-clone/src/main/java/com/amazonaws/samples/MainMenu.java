@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -40,6 +42,7 @@ public class MainMenu extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable2;
     private S3Services s3Services;
+    private ExecutorService executor;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -47,6 +50,7 @@ public class MainMenu extends javax.swing.JFrame {
      */
     public MainMenu() {
     	this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
+      this.executor = Executors.newFixedThreadPool(30);
         setTitle("Dropbox Clone");
         initComponents();
         setResizable(false);
@@ -207,7 +211,7 @@ public class MainMenu extends javax.swing.JFrame {
             		 s3Services.upload(listOfFiles[i], objectName.toString());
             	}
             }
-            new WatchDir(dir, true, this).processEvents();
+           executor.execute(new WatchDir(dir, true, this));
         }
         catch(Exception e) {
             
@@ -285,6 +289,8 @@ public class MainMenu extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+
+      
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

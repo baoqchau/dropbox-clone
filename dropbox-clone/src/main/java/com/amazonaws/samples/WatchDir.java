@@ -43,7 +43,7 @@ import javax.swing.JOptionPane;
  * Example to watch a directory (or tree) for changes to files.
  */
 
-public class WatchDir extends Observable {
+public class WatchDir extends Observable implements Runnable {
 
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
@@ -185,8 +185,12 @@ public class WatchDir extends Observable {
         }
     }
     
-    static void usage() {
-        System.err.println("usage: java WatchDir [-r] dir");
-        System.exit(-1);
+    @Override
+    public void run() {
+      try {
+        this.processEvents();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 }
