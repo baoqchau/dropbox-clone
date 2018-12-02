@@ -150,7 +150,7 @@ public class WatchDir extends Observable {
 
                 // print out event
                 if (event.kind().name() == "ENTRY_CREATE") {
-                	s3Services.upload(child.toString(), name.toString());//event.kind().name() + "-" +  name.toString() + "-" + child.toString());
+            //    	s3Services.upload(child.toString(), name.toString());//event.kind().name() + "-" +  name.toString() + "-" + child.toString());
                 } else if (event.kind().name() == "ENTRY_DELETE") {
                 	s3Services.delete(name.toString());
                 }

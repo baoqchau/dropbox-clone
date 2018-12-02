@@ -65,10 +65,10 @@ public class S3Services {
             e.printStackTrace();
         }
 	}
-    public void upload(String filePath, String fileName) throws IOException {
+    public void upload(File file, String fileName) throws IOException {
         try {           
             // Upload a file as a new object with ContentType and title specified.
-            PutObjectRequest request = new PutObjectRequest(this.bucketName, fileName, new File(filePath));
+            PutObjectRequest request = new PutObjectRequest(this.bucketName, fileName, file);
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType("plain/text");
             metadata.addUserMetadata("x-amz-meta-title", "someTitle");

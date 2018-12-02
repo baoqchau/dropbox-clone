@@ -26,12 +26,28 @@ import javax.swing.table.*;
  * @author Ye
  */
 public class mainPage extends javax.swing.JFrame {
+	
+	 // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenuBar jMenuBar2;
+    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable2;
+    private S3Services s3Services;
+    // End of variables declaration//GEN-END:variables
 
     /**
      * Creates new form mainPage
      */
     public mainPage() {
-        setTitle("PolyBox");
+    	this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
+        setTitle("Dropbox Clone");
         initComponents();
         setResizable(false);
         this.setTransferHandler(new FileListTransferHandler(jTable2));
@@ -70,7 +86,7 @@ public class mainPage extends javax.swing.JFrame {
         jButton2.setText("Delete");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                deleteSelectedFile(evt);
             }
         });
 
@@ -188,6 +204,7 @@ public class mainPage extends javax.swing.JFrame {
             		 objectName.append(objectDir);
             		 objectName.append(listOfFiles[i].getName());
             		 addNewFileToTable(listOfFiles[i]);
+            		 s3Services.upload(listOfFiles[i], objectName.toString());
             	}
             }
         } 
@@ -196,11 +213,17 @@ public class mainPage extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void deleteSelectedFile(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // Delete selected row
         try{
             int i = jTable2.getSelectedRow();
-           ((DefaultTableModel)jTable2.getModel()).removeRow(i);
+            DefaultTableModel model = ((DefaultTableModel)jTable2.getModel());
+            File deletedFile = new File(model.getValueAt(i, 3).toString());
+            if (deletedFile.delete()) {
+            	model.removeRow(i);
+            } else {
+            	JOptionPane.showMessageDialog(this, "Selected file cannot be deleted", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } 
         catch(Exception e) {
             
@@ -357,18 +380,6 @@ class FileListTransferHandler extends TransferHandler {
     }
    }
 }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
-    private javax.swing.JMenuBar jMenuBar2;
-    private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable2;
-    // End of variables declaration//GEN-END:variables
+   
 }
 
