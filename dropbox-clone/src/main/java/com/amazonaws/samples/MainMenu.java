@@ -25,7 +25,7 @@ import javax.swing.table.*;
  *
  * @author Ye
  */
-public class mainPage extends javax.swing.JFrame {
+public class MainMenu extends javax.swing.JFrame {
 	
 	 // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -43,9 +43,9 @@ public class mainPage extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Creates new form mainPage
+     * Creates new form MainMenu
      */
-    public mainPage() {
+    public MainMenu() {
     	this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
         setTitle("Dropbox Clone");
         initComponents();
@@ -183,6 +183,7 @@ public class mainPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void selectDirectory(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        Path dir = Paths.get(".");
         try{
         	 JFileChooser fileChooser = new JFileChooser();
              fileChooser.setCurrentDirectory(new java.io.File("."));
@@ -195,8 +196,7 @@ public class mainPage extends javax.swing.JFrame {
         	 System.out.println(watchDir.getName());
         	 StringBuilder objectDir = new StringBuilder(watchDir.getName());
         	 objectDir.append("/");
-             Path dir = Paths.get(watchDir.toString());
-             //new WatchDir(dir, true).processEvents();
+             dir = Paths.get(watchDir.toString());
              File[] listOfFiles = watchDir.listFiles();
              for (int i=0; i < listOfFiles.length; i++) {
              if (listOfFiles[i].isFile()) {
@@ -207,10 +207,12 @@ public class mainPage extends javax.swing.JFrame {
             		 s3Services.upload(listOfFiles[i], objectName.toString());
             	}
             }
-        } 
+            new WatchDir(dir, true, this).processEvents();
+        }
         catch(Exception e) {
             
         }
+ 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void deleteSelectedFile(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -230,6 +232,12 @@ public class mainPage extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    public void addNewFileToDirectory(File file) {
+      System.out.println("from processFile");
+      System.out.println(file.toString());
+      addNewFileToTable(file);
+     // this.revalidate();
+    }
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         System.exit(0);
@@ -285,20 +293,20 @@ public class mainPage extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new mainPage().setVisible(true);
+                new MainMenu().setVisible(true);
             }
         });
     }
