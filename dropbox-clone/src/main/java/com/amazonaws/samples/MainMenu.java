@@ -224,7 +224,7 @@ public class MainMenu extends javax.swing.JFrame {
         try{
             int i = jTable2.getSelectedRow();
             DefaultTableModel model = ((DefaultTableModel)jTable2.getModel());
-            File deletedFile = new File(model.getValueAt(i, 3).toString());
+            File deletedFile = new File(model.getValueAt(i, 2).toString());
             if (deletedFile.delete()) {
             	model.removeRow(i);
             } else {

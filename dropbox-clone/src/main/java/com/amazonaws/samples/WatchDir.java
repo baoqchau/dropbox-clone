@@ -156,7 +156,7 @@ public class WatchDir extends Observable implements Runnable {
                 if (event.kind().name() == "ENTRY_CREATE") {
                   this.mainMenu.addNewFileToDirectory(new File(child.toString()));
                 } else if (event.kind().name() == "ENTRY_DELETE") {
-                	s3Services.delete(name.toString());
+                	s3Services.delete(fileName.toString());
                 } else if (event.kind().name() == "ENTRY_MODIFY") {
                   s3Services.upload(new File(child.toString()), fileName.toString());
                 }
