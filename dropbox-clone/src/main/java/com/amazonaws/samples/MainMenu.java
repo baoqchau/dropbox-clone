@@ -107,14 +107,14 @@ public class MainMenu extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Name", "Size", "Type", "Path"
+                "Name", "Type", "Path"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -237,13 +237,13 @@ public class MainMenu extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     public void addNewFileToDirectory(File file) {
-      System.out.println("from processFile");
       System.out.println(file.toString());
       addNewFileToTable(file);
      // this.revalidate();
     }
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        this.executor.shutdown();
         System.exit(0);
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -277,7 +277,7 @@ public class MainMenu extends javax.swing.JFrame {
         String Name = importFile.getName();
         String type = Name.substring(importFile.getName().lastIndexOf('.'));
         String path = importFile.getPath();
-        tableModel.addRow(new Object[] {Name ,sizeInKb(importFile) ,type, path});
+        tableModel.addRow(new Object[] {Name ,type, path});
     }
     
     /**

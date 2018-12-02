@@ -149,13 +149,16 @@ public class WatchDir extends Observable implements Runnable {
                 Path child = dir.resolve(name);
                 System.out.println(name.toString());
                 System.out.println(child.toString());
+                StringBuilder fileName = new StringBuilder(dir.getFileName().toString());
+                fileName.append("/" + name.toString());
 
                 // print out event
                 if (event.kind().name() == "ENTRY_CREATE") {
-                  this.mainMenu.addNewFileToDirectory(new File(name.toString()));
-            //    	s3Services.upload(child.toString(), name.toString());//event.kind().name() + "-" +  name.toString() + "-" + child.toString());
+                  this.mainMenu.addNewFileToDirectory(new File(child.toString()));
                 } else if (event.kind().name() == "ENTRY_DELETE") {
                 	s3Services.delete(name.toString());
+                } else if (event.kind().name() == "ENTRY_MODIFY") {
+                  s3Services.upload(new File(child.toString()), fileName.toString());
                 }
                 System.out.format("%s: %s\n", event.kind().name(), child);
 
