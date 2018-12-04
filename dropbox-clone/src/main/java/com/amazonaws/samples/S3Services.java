@@ -15,11 +15,13 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.*;
 
 public class S3Services {
 	
 	private static ProfileCredentialsProvider credentialsProvider = null;
 	private AmazonS3 s3Client;
+	private TransferManager transferManager;
 	private String bucketName = "";
 	
 	public S3Services(String clientRegion, String bucketName) {
@@ -39,6 +41,7 @@ public class S3Services {
 	        .withRegion(clientRegion)
 	        .withCredentials(this.credentialsProvider)
 	        .build();
+	      this.transferManager = TransferManagerBuilder.standard().withS3Client(this.s3Client).build();
 		 } catch(AmazonServiceException e) {
             // The call was transmitted successfully, but Amazon S3 couldn't process 
             // it, so it returned an error response.
@@ -116,5 +119,9 @@ public class S3Services {
 	        // couldn't parse the response from Amazon S3.
 	        e.printStackTrace();
 	    }
+    }
+    
+    public void downloadFileFromDirectory(String dir) throws IOException {
+      
     }
 }
