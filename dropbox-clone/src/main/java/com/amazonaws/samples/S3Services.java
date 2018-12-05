@@ -121,7 +121,13 @@ public class S3Services {
 	    }
     }
     
-    public void downloadFileFromDirectory(String dir) throws IOException {
-      
+    public void downloadFileFromDirectory(String dirToDownload, String storedDir) throws IOException {
+      try {
+    	transferManager.downloadDirectory(this.bucketName, dirToDownload, new File(storedDir));
+      } catch(AmazonServiceException e) {
+    	  e.printStackTrace();
+      } catch (SdkClientException e) {
+    	  e.printStackTrace();
+      }
     }
 }

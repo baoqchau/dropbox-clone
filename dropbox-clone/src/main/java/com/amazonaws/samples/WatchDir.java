@@ -101,7 +101,7 @@ public class WatchDir extends Observable implements Runnable {
         this.recursive = recursive;
         this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
         this.mainMenu = mainMenu;
-        s3Services.listFilesInBucket();
+        s3Services.downloadFileFromDirectory("test_dir", "/home/bao/code/cpp");;
 
         if (recursive) {
             System.out.format("Scanning %s ...\n", dir);
