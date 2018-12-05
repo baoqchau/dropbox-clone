@@ -2,6 +2,7 @@ package com.amazonaws.samples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -15,11 +16,13 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.*;
 
 public class S3Services {
 	
 	private static ProfileCredentialsProvider credentialsProvider = null;
 	private AmazonS3 s3Client;
+	private TransferManager transferManager;
 	private String bucketName = "";
 	
 	public S3Services(String clientRegion, String bucketName) {
@@ -39,6 +42,7 @@ public class S3Services {
 	        .withRegion(clientRegion)
 	        .withCredentials(this.credentialsProvider)
 	        .build();
+	      this.transferManager = TransferManagerBuilder.standard().withS3Client(this.s3Client).build();
 		 } catch(AmazonServiceException e) {
             // The call was transmitted successfully, but Amazon S3 couldn't process 
             // it, so it returned an error response.
@@ -88,22 +92,23 @@ public class S3Services {
         }
     }
     
-    public void listFilesInBucket() throws IOException {
+    public ArrayList<String> getDirectoriesInBucket() throws IOException {
+      ArrayList<String> directories = new ArrayList<>();
     	try {
-	        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(this.bucketName).withMaxKeys(2);
+	        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(this.bucketName);
 	        ListObjectsV2Result result;
-	
 	        do {
 	            result = s3Client.listObjectsV2(req);
 	
 	            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
-	                System.out.printf(" - %s (size: %d)\n", objectSummary.getKey(), objectSummary.getSize());
+	              StringBuilder objectKey = new StringBuilder(objectSummary.getKey());
+	              String directory = objectKey.substring(0, objectKey.indexOf("/"));
+	              if (!directories.contains(directory)) {
+	                directories.add(directory);
+	              }
 	            }
 	            // If there are more than maxKeys keys in the bucket, get a continuation token
-	            // and list the next objects.
-	            String token = result.getNextContinuationToken();
-	            System.out.println("Next Continuation Token: " + token);
-	            req.setContinuationToken(token);
+	            // and list the next objects
 	        } while (result.isTruncated());
 	    }
 	    catch(AmazonServiceException e) {
@@ -116,5 +121,16 @@ public class S3Services {
 	        // couldn't parse the response from Amazon S3.
 	        e.printStackTrace();
 	    }
+    	return directories;
+    }
+    
+    public void downloadFileFromDirectory(String dirToDownload, String storedDir) throws IOException {
+      try {
+    	transferManager.downloadDirectory(this.bucketName, dirToDownload, new File(storedDir));
+      } catch(AmazonServiceException e) {
+    	  e.printStackTrace();
+      } catch (SdkClientException e) {
+    	  e.printStackTrace();
+      }
     }
 }

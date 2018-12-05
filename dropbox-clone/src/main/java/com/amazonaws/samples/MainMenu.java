@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -25,7 +27,7 @@ import javax.swing.table.*;
  *
  * @author Ye
  */
-public class mainPage extends javax.swing.JFrame {
+public class MainMenu extends javax.swing.JFrame {
 	
 	 // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -40,13 +42,25 @@ public class mainPage extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable2;
     private S3Services s3Services;
+    private ExecutorService executor;
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Creates new form mainPage
+     * Creates new form MainMenu
      */
-    public mainPage() {
+    public MainMenu() {
     	this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
+    	ArrayList<String> directories;
+    	try {
+    	  directories = this.s3Services.getDirectoriesInBucket();
+    	  for (int i=0; i < directories.size(); i++) {
+          System.out.println(directories.get(i));
+        }
+    	} catch (IOException e) {
+    	  e.printStackTrace();
+    	}
+    	
+      this.executor = Executors.newFixedThreadPool(30);
         setTitle("Dropbox Clone");
         initComponents();
         setResizable(false);
@@ -103,14 +117,14 @@ public class mainPage extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Name", "Size", "Type", "Path"
+                "Name", "Type", "Path"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -183,6 +197,7 @@ public class mainPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void selectDirectory(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        Path dir = Paths.get(".");
         try{
         	 JFileChooser fileChooser = new JFileChooser();
              fileChooser.setCurrentDirectory(new java.io.File("."));
@@ -195,8 +210,7 @@ public class mainPage extends javax.swing.JFrame {
         	 System.out.println(watchDir.getName());
         	 StringBuilder objectDir = new StringBuilder(watchDir.getName());
         	 objectDir.append("/");
-             Path dir = Paths.get(watchDir.toString());
-             //new WatchDir(dir, true).processEvents();
+             dir = Paths.get(watchDir.toString());
              File[] listOfFiles = watchDir.listFiles();
              for (int i=0; i < listOfFiles.length; i++) {
              if (listOfFiles[i].isFile()) {
@@ -207,10 +221,12 @@ public class mainPage extends javax.swing.JFrame {
             		 s3Services.upload(listOfFiles[i], objectName.toString());
             	}
             }
-        } 
+           executor.execute(new WatchDir(dir, true, this));
+        }
         catch(Exception e) {
             
         }
+ 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void deleteSelectedFile(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -218,7 +234,7 @@ public class mainPage extends javax.swing.JFrame {
         try{
             int i = jTable2.getSelectedRow();
             DefaultTableModel model = ((DefaultTableModel)jTable2.getModel());
-            File deletedFile = new File(model.getValueAt(i, 3).toString());
+            File deletedFile = new File(model.getValueAt(i, 2).toString());
             if (deletedFile.delete()) {
             	model.removeRow(i);
             } else {
@@ -230,8 +246,14 @@ public class mainPage extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    public void addNewFileToDirectory(File file) {
+      System.out.println(file.toString());
+      addNewFileToTable(file);
+     // this.revalidate();
+    }
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        this.executor.shutdown();
         System.exit(0);
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -265,7 +287,7 @@ public class mainPage extends javax.swing.JFrame {
         String Name = importFile.getName();
         String type = Name.substring(importFile.getName().lastIndexOf('.'));
         String path = importFile.getPath();
-        tableModel.addRow(new Object[] {Name ,sizeInKb(importFile) ,type, path});
+        tableModel.addRow(new Object[] {Name ,type, path});
     }
     
     /**
@@ -277,6 +299,8 @@ public class mainPage extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+
+      
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -285,20 +309,20 @@ public class mainPage extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(mainPage.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new mainPage().setVisible(true);
+                new MainMenu().setVisible(true);
             }
         });
     }

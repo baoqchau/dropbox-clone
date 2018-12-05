@@ -43,13 +43,14 @@ import javax.swing.JOptionPane;
  * Example to watch a directory (or tree) for changes to files.
  */
 
-public class WatchDir extends Observable {
+public class WatchDir extends Observable implements Runnable {
 
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
     private final boolean recursive;
     private boolean trace = false;
     private S3Services s3Services;
+    private MainMenu mainMenu;
 
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
@@ -94,12 +95,13 @@ public class WatchDir extends Observable {
     /**
      * Creates a WatchService and registers the given directory
      */
-    WatchDir(Path dir, boolean recursive) throws IOException {
+    WatchDir(Path dir, boolean recursive, MainMenu mainMenu) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey,Path>();
         this.recursive = recursive;
         this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
-        s3Services.listFilesInBucket();
+        this.mainMenu = mainMenu;
+        s3Services.downloadFileFromDirectory("test_dir", "/home/bao/code/cpp");;
 
         if (recursive) {
             System.out.format("Scanning %s ...\n", dir);
@@ -147,12 +149,16 @@ public class WatchDir extends Observable {
                 Path child = dir.resolve(name);
                 System.out.println(name.toString());
                 System.out.println(child.toString());
+                StringBuilder fileName = new StringBuilder(dir.getFileName().toString());
+                fileName.append("/" + name.toString());
 
                 // print out event
                 if (event.kind().name() == "ENTRY_CREATE") {
-            //    	s3Services.upload(child.toString(), name.toString());//event.kind().name() + "-" +  name.toString() + "-" + child.toString());
+                  this.mainMenu.addNewFileToDirectory(new File(child.toString()));
                 } else if (event.kind().name() == "ENTRY_DELETE") {
-                	s3Services.delete(name.toString());
+                	s3Services.delete(fileName.toString());
+                } else if (event.kind().name() == "ENTRY_MODIFY") {
+                  s3Services.upload(new File(child.toString()), fileName.toString());
                 }
                 System.out.format("%s: %s\n", event.kind().name(), child);
 
@@ -182,15 +188,12 @@ public class WatchDir extends Observable {
         }
     }
     
-    static void usage() {
-        System.err.println("usage: java WatchDir [-r] dir");
-        System.exit(-1);
-    }
- 
-    public static void main(String[] args) throws IOException {
- 
-        // register directory and process its events
-        Path dir = Paths.get("/home/bao/code/cpp/dropbox-clone/dropbox-clone/test_dir");
-        new WatchDir(dir, true).processEvents();
+    @Override
+    public void run() {
+      try {
+        this.processEvents();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 }
