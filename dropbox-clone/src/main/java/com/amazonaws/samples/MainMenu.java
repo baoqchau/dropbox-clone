@@ -40,7 +40,9 @@ public class MainMenu extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar2;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable2;
+    private javax.swing.JTable jTable3;
     private S3Services s3Services;
     private ExecutorService executor;
     // End of variables declaration//GEN-END:variables
@@ -51,20 +53,13 @@ public class MainMenu extends javax.swing.JFrame {
     public MainMenu() {
     	this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
     	ArrayList<String> directories;
-    	try {
-    	  directories = this.s3Services.getDirectoriesInBucket();
-    	  for (int i=0; i < directories.size(); i++) {
-          System.out.println(directories.get(i));
-        }
-    	} catch (IOException e) {
-    	  e.printStackTrace();
-    	}
+    	
     	
       this.executor = Executors.newFixedThreadPool(30);
         setTitle("Dropbox Clone");
         initComponents();
         setResizable(false);
-        this.setTransferHandler(new FileListTransferHandler(jTable2));
+        //this.setTransferHandler(new FileListTransferHandler(jTable2));
     }
 
     /**
@@ -80,7 +75,9 @@ public class MainMenu extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
+        jTable3 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jButton4 = new javax.swing.JButton();
         jProgressBar1 = new javax.swing.JProgressBar();
@@ -104,11 +101,17 @@ public class MainMenu extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Exit");
-        jButton3.setToolTipText("");
+        jButton3.setText("Download");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                downloadSelectedDirectory(evt);
+            }
+        });
+        jButton4.setText("Exit");
+        jButton4.setToolTipText("");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitProgram(evt);
             }
         });
 
@@ -135,8 +138,32 @@ public class MainMenu extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(jTable2);
+        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+                new Object [][] {
 
+                },
+                new String [] {
+                    "Name"
+                }
+            ) {
+                Class[] types = new Class [] {
+                    java.lang.String.class
+                };
+                boolean[] canEdit = new boolean [] {
+                    false
+                };
+
+                public Class getColumnClass(int columnIndex) {
+                    return types [columnIndex];
+                }
+
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return canEdit [columnIndex];
+                }
+            });
+        
+        jScrollPane2.setViewportView(jTable2);
+        jScrollPane3.setViewportView(jTable3);
         jLabel1.setText("PROGRESS%");
 
 //        jButton4.setText("Upload");
@@ -161,8 +188,9 @@ public class MainMenu extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup()
+                		.addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE)
+                		.addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -177,7 +205,9 @@ public class MainMenu extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                	.addGroup(layout.createSequentialGroup()
+                	    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -193,9 +223,20 @@ public class MainMenu extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        setUpDownloadableDirectories();
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void setUpDownloadableDirectories() {
+      try {
+        ArrayList<String> directories = this.s3Services.getDirectoriesInBucket();
+    	for (int i=0; i < directories.size(); i++) {
+    		addNewFileToTable(directories.get(i), this.jTable3);
+    	}
+      }catch (IOException e) {
+    	e.printStackTrace();
+      }
+    }
     private void selectDirectory(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         Path dir = Paths.get(".");
         try{
@@ -217,7 +258,7 @@ public class MainMenu extends javax.swing.JFrame {
             		 StringBuilder objectName = new StringBuilder();
             		 objectName.append(objectDir);
             		 objectName.append(listOfFiles[i].getName());
-            		 addNewFileToTable(listOfFiles[i]);
+            		 addNewFileToTable(listOfFiles[i], this.jTable2);
             		 s3Services.upload(listOfFiles[i], objectName.toString());
             	}
             }
@@ -248,10 +289,10 @@ public class MainMenu extends javax.swing.JFrame {
 
     public void addNewFileToDirectory(File file) {
       System.out.println(file.toString());
-      addNewFileToTable(file);
+      addNewFileToTable(file, this.jTable2);
      // this.revalidate();
     }
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void exitProgram(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         this.executor.shutdown();
         System.exit(0);
@@ -282,12 +323,21 @@ public class MainMenu extends javax.swing.JFrame {
         return sizeInKB;
     }
     
-    public void addNewFileToTable(File importFile) {
-    	DefaultTableModel tableModel = (DefaultTableModel)jTable2.getModel();
+    public void downloadSelectedDirectory(java.awt.event.ActionEvent evt) {
+    	
+    }
+    
+    public void addNewFileToTable(File importFile, JTable jTable) {
+    	DefaultTableModel tableModel = (DefaultTableModel)jTable.getModel();
         String Name = importFile.getName();
         String type = Name.substring(importFile.getName().lastIndexOf('.'));
         String path = importFile.getPath();
         tableModel.addRow(new Object[] {Name ,type, path});
+    }
+    
+    public void addNewFileToTable(String Name, JTable jTable) {
+    	DefaultTableModel tableModel = (DefaultTableModel)jTable.getModel();
+        tableModel.addRow(new Object[] {Name});
     }
     
     /**
