@@ -2,6 +2,7 @@ package com.amazonaws.samples;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -91,22 +92,23 @@ public class S3Services {
         }
     }
     
-    public void listFilesInBucket() throws IOException {
+    public ArrayList<String> getDirectoriesInBucket() throws IOException {
+      ArrayList<String> directories = new ArrayList<>();
     	try {
-	        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(this.bucketName).withMaxKeys(2);
+	        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(this.bucketName);
 	        ListObjectsV2Result result;
-	
 	        do {
 	            result = s3Client.listObjectsV2(req);
 	
 	            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
-	                System.out.printf(" - %s (size: %d)\n", objectSummary.getKey(), objectSummary.getSize());
+	              StringBuilder objectKey = new StringBuilder(objectSummary.getKey());
+	              String directory = objectKey.substring(0, objectKey.indexOf("/"));
+	              if (!directories.contains(directory)) {
+	                directories.add(directory);
+	              }
 	            }
 	            // If there are more than maxKeys keys in the bucket, get a continuation token
-	            // and list the next objects.
-	            String token = result.getNextContinuationToken();
-	            System.out.println("Next Continuation Token: " + token);
-	            req.setContinuationToken(token);
+	            // and list the next objects
 	        } while (result.isTruncated());
 	    }
 	    catch(AmazonServiceException e) {
@@ -119,6 +121,7 @@ public class S3Services {
 	        // couldn't parse the response from Amazon S3.
 	        e.printStackTrace();
 	    }
+    	return directories;
     }
     
     public void downloadFileFromDirectory(String dirToDownload, String storedDir) throws IOException {

@@ -50,6 +50,16 @@ public class MainMenu extends javax.swing.JFrame {
      */
     public MainMenu() {
     	this.s3Services = new S3Services("us-west-2", "dropbox-clone-cs4650");
+    	ArrayList<String> directories;
+    	try {
+    	  directories = this.s3Services.getDirectoriesInBucket();
+    	  for (int i=0; i < directories.size(); i++) {
+          System.out.println(directories.get(i));
+        }
+    	} catch (IOException e) {
+    	  e.printStackTrace();
+    	}
+    	
       this.executor = Executors.newFixedThreadPool(30);
         setTitle("Dropbox Clone");
         initComponents();
