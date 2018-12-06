@@ -80,7 +80,6 @@ public class MainMenu extends javax.swing.JFrame {
         jTable3 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jButton4 = new javax.swing.JButton();
-        jProgressBar1 = new javax.swing.JProgressBar();
         jMenuBar2 = new javax.swing.JMenuBar();
         jMenu3 = new javax.swing.JMenu();
         jMenu4 = new javax.swing.JMenu();
@@ -164,15 +163,6 @@ public class MainMenu extends javax.swing.JFrame {
         
         jScrollPane2.setViewportView(jTable2);
         jScrollPane3.setViewportView(jTable3);
-        jLabel1.setText("PROGRESS%");
-
-//        jButton4.setText("Upload");
-//        jButton4.setActionCommand("");
-//        jButton4.addActionListener(new java.awt.event.ActionListener() {
-//            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                jButton4ActionPerformed(evt);
-//            }
-//        });
 
         jMenu3.setText("File");
         jMenuBar2.add(jMenu3);
@@ -195,9 +185,7 @@ public class MainMenu extends javax.swing.JFrame {
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -217,9 +205,7 @@ public class MainMenu extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 164, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addContainerGap())
         );
 
@@ -324,7 +310,23 @@ public class MainMenu extends javax.swing.JFrame {
     }
     
     public void downloadSelectedDirectory(java.awt.event.ActionEvent evt) {
-    	
+    	 try{
+             int i = jTable3.getSelectedRow();
+             DefaultTableModel model = ((DefaultTableModel)jTable3.getModel());
+             String selectedDirectory = model.getValueAt(i, 0).toString();
+             JFileChooser fileChooser = new JFileChooser();
+             fileChooser.setCurrentDirectory(new java.io.File("."));
+             fileChooser.setDialogTitle("Choose a directory");
+             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+             int showOpenDialog = fileChooser.showOpenDialog(this);
+             if (showOpenDialog != JFileChooser.APPROVE_OPTION) return;
+            //implement download 
+             File destinationDir = fileChooser.getSelectedFile();
+             s3Services.downloadFileFromDirectory(selectedDirectory, destinationDir.toString());
+         } 
+         catch(Exception e) {
+             
+         }
     }
     
     public void addNewFileToTable(File importFile, JTable jTable) {
@@ -376,84 +378,5 @@ public class MainMenu extends javax.swing.JFrame {
             }
         });
     }
-class FileListTransferHandler extends TransferHandler {
-    private JTable table;
-
-    public FileListTransferHandler(JTable list) {
-      this.table = list;
-    }
-
-    public int getSourceActions(JComponent c) {
-      return COPY_OR_MOVE;
-    }
-
-    public boolean canImport(TransferSupport ts) {
-      return ts.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
-    }
-    public boolean importData(TransferSupport ts) {
-        try {
-            String dir = ts.getTransferable().getTransferData(DataFlavor.javaFileListFlavor).toString();
-            dir = dir.substring(1, dir.length()- 1);
-            System.out.println(dir);
-
-            DecimalFormat df = new DecimalFormat("#.#");
-            df.setRoundingMode(RoundingMode.CEILING);
-            //parsing directory names and converting them into file array
-            List<File> fileList = new ArrayList<>();
-
-            int lastComma = 0;
-            for(int i = 2; i < dir.length(); i++) {
-                //System.out.println(dir.substring(i-2,i));
-                if(dir.substring(i-2,i).equals(", ")) {
-                    File file = new File(dir.substring(lastComma,i-2));
-                    fileList.add(file);
-                    lastComma = i; 
-                }
-            }
-            File file = new File(dir.substring(lastComma, dir.length()));
-            fileList.add(file);
-
-            System.out.println(fileList.toString());
-            if(fileList.size() < 1) {
-               return false;
-            }
-            DefaultTableModel tableModel = (DefaultTableModel)jTable2.getModel();
-
-            for(int i = 0; i < fileList.size(); i++) {
-                File curFile = fileList.get(i);
-                double num = curFile.length();
-                String str;
-                String sizeInKB = Double.toString(num) +"B";
-                if(((num/1024)/1024)/1024  > 1) {
-                    num = ((num/1024)/1024)/1024;
-                    str = df.format(num);
-                    sizeInKB = str + "GB";
-                } 
-                else if((num/1024)/1024 > 1) {
-                    num = (num/1024)/1024;
-                    str = df.format(num);
-                    sizeInKB = str + "MB";
-                }
-                else if(num/1024 > 1) {
-                    num = num/1024;
-                    str = df.format(num);
-                    sizeInKB = str + "KB";
-                }
-
-
-                String Name = curFile.getName();
-                String type = Name.substring(fileList.get(i).getName().lastIndexOf('.'));
-                String path = curFile.getPath();
-                tableModel.addRow(new Object[] {Name ,sizeInKB ,type, path});
-            }
-            return true;
-        } catch (UnsupportedFlavorException e) {
-            return false;
-        } catch (IOException e) {
-            return false;
-    }
-   }
-}
-   
 }
 
