@@ -1,4 +1,4 @@
-# Build your own Dropbox
+# Build your own Dropbox with AWS S3
 
 CS4650 Team Project Assignment: Develop the backend for a Dropbox-like web service. The program will be working with AWS S3 API. 
 
